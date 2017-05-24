@@ -4,8 +4,26 @@ import com.jy.draw.graph.common.Color;
 import com.jy.draw.graph.entity.Pix;
 
 public class Circle {
+
+    /**
+     * 半径
+     * */
+    private int radius;
+
+    /**
+     * 圆心
+     * */
+    private Pix center;
+
+    /**
+     * 画布
+     * */
+    private byte[][] canvas;
+
     /**
      * 二位数组中获取最大的正方形
+     * 圆的解析式为：(x-a)²+(y-b)²=r²
+     * 其中，（a，b）为圆心坐标，r为半径。----都为已知数。因此，只要再（知道x，就可求对应y值）。即可得圆上（点的坐标）。
      * */
     public byte[][] getMaxSquare(byte[][] source) {
         if (source == null || source.length == 0) {
@@ -33,70 +51,44 @@ public class Circle {
         //在数组中的表现形式为square[radius][radius]
         // 假设横向长度是７个,此时中心点index应该为3, (7-1)/2，成立
         // 假设横向长度是８个,此时中心点index应该为3, (8-1)/2，成立
-        return (square.length - 1) / 2;
+        return (square.length + 1) / 2;
     }
 
     /**
      * 在正方形中填充圆形颜色
      * */
     public void fillColor(byte[][] square) {
-        int radius = calculateRadius(square);
-        //1.圆心在(radius, radius), 首先画上下左右边上的四个顶点
-        boolean isEven = square.length%2 == 0;
-        if(isEven) {
-            int UpX = radius;
-            int UpY = 0;
-            int rightX = radius * 2 + 1;
-            int rightY = radius;
-            int DownX = radius;
-            int DownY = radius * 2 + 1;
-            int leftX = 0;
-            int leftY = radius;
-            fillEvenColor(square, new Pix(UpX, UpY), new Pix(rightX, rightY), new Pix(DownX, DownY), new Pix(leftX, leftY));
-        }
-        else {
-            int UpX = radius;
-            int UpY = 0;
-            int rightX = radius * 2;
-            int rightY = radius;
-            int DownX = radius;
-            int DownY = radius * 2;
-            int leftX = 0;
-            int leftY = radius;
-            fillOddColor(square, new Pix(UpX, UpY), new Pix(rightX, rightY), new Pix(DownX, DownY), new Pix(leftX, leftY));
+        for (int x = 0; x < radius; x++) {
+            int y = getYpointByX(x);
+            //downleft
+            square[y][x] = Color.BLACK.getValue();
+            //upleft
+            square[center.getY() *2 - y - 1][x] = Color.BLACK.getValue();
+            //downright
+            square[y][radius * 2 - 1 - x] = Color.BLACK.getValue();
+            //upright
+            square[center.getY() *2 - y - 1][radius * 2 - 1 - x] = Color.BLACK.getValue();
+
         }
     }
 
     /**
-     * 当像素个数为偶数
+     * 圆的解析式为：(x-a)²+(y-b)²=r²
      * */
-    public void fillEvenColor(byte[][] square, Pix up, Pix right, Pix down, Pix left) {
-        //顶端两个点
-        square[up.getY()][up.getX()] = Color.BLACK.getValue();
-        square[up.getY()][up.getX() + 1] = Color.BLACK.getValue();
-        //右侧两个点
-        square[right.getY()][right.getX()] = Color.BLACK.getValue();
-        square[right.getY() + 1][right.getX()] = Color.BLACK.getValue();
-        //下侧两个点
-        square[down.getY()][down.getX()] = Color.BLACK.getValue();
-        square[down.getY()][down.getX() + 1] = Color.BLACK.getValue();
-        //左侧两个点
-        square[left.getY()][left.getX()] = Color.BLACK.getValue();
-        square[left.getY() + 1][left.getX()] = Color.BLACK.getValue();
-        //2.根据已有顶点寻找两点之间的顶点
-    }
-    /**
-     * 当像素个数为偶数
-     * */
-    public void fillOddColor(byte[][] square, Pix up, Pix right, Pix down, Pix left) {
-        //顶端一个点
-        square[up.getY()][up.getX()] = Color.BLACK.getValue();
-        //右侧两个点
-        square[right.getY()][right.getX()] = Color.BLACK.getValue();
-        //下侧两个点
-        square[down.getY()][down.getX()] = Color.BLACK.getValue();
-        //左侧两个点
-        square[left.getY()][left.getX()] = Color.BLACK.getValue();
+    public int getYpointByX(int x) {
+        int radiusSquare = radius * radius;
+        int widthRange = x - center.getX();
+        int widthRangeSquare = widthRange * widthRange;
+        int heightRangeSquare = radiusSquare - widthRangeSquare;
+        int heightRange = (int)Math.sqrt(heightRangeSquare);
+        int y = heightRange + center.getY();
+        return y;
     }
 
+
+    public Circle(byte[][] canvas) {
+        this.canvas = canvas;
+        this.radius = calculateRadius(canvas);
+        this.center = new Pix(this.radius, this.radius);
+    }
 }
