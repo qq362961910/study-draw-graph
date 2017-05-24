@@ -51,7 +51,7 @@ public class Circle {
         //在数组中的表现形式为square[radius][radius]
         // 假设横向长度是７个,此时中心点index应该为3, (7-1)/2，成立
         // 假设横向长度是８个,此时中心点index应该为3, (8-1)/2，成立
-        return (square.length + 1) / 2;
+        return square.length / 2;
     }
 
     /**
@@ -62,14 +62,26 @@ public class Circle {
             int y = getYpointByX(x);
             //downleft
             square[y][x] = Color.BLACK.getValue();
-            //upleft
-            square[center.getY() *2 - y - 1][x] = Color.BLACK.getValue();
+            int yRange = y - center.getY();
+            if (yRange != 0) {
+                //upleft
+                square[center.getY() *2 - y - 1][x] = Color.BLACK.getValue();
+                //upright
+                square[center.getY() *2 - y - 1][radius * 2 - 1 - x] = Color.BLACK.getValue();
+            }
             //downright
             square[y][radius * 2 - 1 - x] = Color.BLACK.getValue();
-            //upright
-            square[center.getY() *2 - y - 1][radius * 2 - 1 - x] = Color.BLACK.getValue();
-
         }
+    }
+
+    public static void main(String[] args) {
+        Circle circle = new Circle(new byte[4][4]);
+        System.out.println("radius: " + circle.radius);
+        System.out.println(circle.center);
+        for (int i=0; i<circle.radius; i++) {
+            System.out.println("x: " + i + ", y: " + circle.getYpointByX(i));
+        }
+
     }
 
     /**
@@ -87,8 +99,20 @@ public class Circle {
 
 
     public Circle(byte[][] canvas) {
-        this.canvas = canvas;
-        this.radius = calculateRadius(canvas);
+        this.canvas = getMaxSquare(canvas);
+        this.radius = calculateRadius(this.canvas);
         this.center = new Pix(this.radius, this.radius);
+    }
+
+    public int getRadius() {
+        return radius;
+    }
+
+    public Pix getCenter() {
+        return center;
+    }
+
+    public byte[][] getCanvas() {
+        return canvas;
     }
 }

@@ -34,4 +34,12 @@ public class Pix {
         this.x = x;
         this.y = y;
     }
+
+    @Override
+    public String toString() {
+        return "Pix{" +
+                "x=" + x +
+                ", y=" + y +
+                '}';
+    }
 }
